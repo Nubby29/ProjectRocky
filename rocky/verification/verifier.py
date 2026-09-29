@@ -1,4 +1,4 @@
-"""Deterministic source verification for Rocky 0.4."""
+"""Deterministic source verification for Rocky 0.6."""
 
 from dataclasses import dataclass
 from rocky.memory.store import MemoryStore
@@ -40,6 +40,10 @@ class Verifier:
             groups.setdefault(key, []).append(item)
 
         if len(groups) > 1 and len(sources) >= 2:
+            self.memory.add_experience(
+                "verification",
+                f"Verification conflict for {subject}; evidence was not promoted to verified knowledge.",
+            )
             return VerificationResult(
                 "CONFLICT",
                 subject,
@@ -57,6 +61,10 @@ class Verifier:
 
         verified_text = evidence[0]["text"]
         self.memory.remember_verified_fact(subject, verified_text, evidence)
+        self.memory.add_experience(
+            "verification",
+            f"Verified knowledge about {subject} using {len(sources)} agreeing sources.",
+        )
         return VerificationResult(
             "VERIFIED",
             subject,
