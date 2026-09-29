@@ -13,7 +13,7 @@ class VerificationResult:
 
 
 class Verifier:
-    """Verifies a candidate when independent supplied sources agree exactly."""
+    """Verifies a candidate when distinct supplied sources agree exactly."""
 
     def __init__(self, memory: MemoryStore):
         self.memory = memory
@@ -33,12 +33,13 @@ class Verifier:
                 "UNKNOWN", subject, f"I have no learning evidence for {subject}.", 0
             )
 
+        sources = {item["source"].casefold() for item in evidence if item.get("source")}
         groups: dict[str, list[dict[str, str]]] = {}
         for item in evidence:
             key = self._normalize(item["text"])
             groups.setdefault(key, []).append(item)
 
-        if len(groups) > 1:
+        if len(groups) > 1 and len(sources) >= 2:
             return VerificationResult(
                 "CONFLICT",
                 subject,
@@ -46,11 +47,11 @@ class Verifier:
                 len(evidence),
             )
 
-        if len(evidence) < 2:
+        if len(sources) < 2:
             return VerificationResult(
                 "UNVERIFIED",
                 subject,
-                f"I need another agreeing source before I can verify {subject}.",
+                f"I need another distinct source before I can verify {subject}.",
                 len(evidence),
             )
 
@@ -59,6 +60,6 @@ class Verifier:
         return VerificationResult(
             "VERIFIED",
             subject,
-            f"I verified {subject} using {len(evidence)} agreeing sources.",
+            f"I verified {subject} using {len(sources)} agreeing sources.",
             len(evidence),
         )
