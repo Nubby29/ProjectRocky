@@ -32,3 +32,26 @@ This phase does not introduce autonomous web research, automatic fact promotion,
 ### Memory-grounded chat refinement
 
 Rocky's local language-model brain now receives explicit memory-status labels such as `VERIFIED`, `UNVERIFIED`, and `LEGACY`. The model is instructed to use supplied memory as its factual knowledge boundary and to say when it does not know something rather than inventing unsupported facts.
+
+
+## Rocky 1.5 — Multimodal
+
+Rocky can optionally send local images to an Ollama-compatible vision model while keeping its persistent memory separate from generated responses.
+
+Default vision model: `llama3.2-vision:11b`
+
+Override with:
+
+    $env:ROCKY_VISION_MODEL="your-vision-model"
+
+Use:
+
+    chat-image <image-path>: <message>
+
+For example:
+
+    chat-image C:\Images\rocky.png: Describe this image.
+
+The image is read locally and sent as base64 image data to the configured Ollama-compatible endpoint. Rocky does not automatically store visual observations as verified facts.
+
+This phase also normalizes carriage returns in model output so a model response cannot overwrite the command prompt in a terminal.
