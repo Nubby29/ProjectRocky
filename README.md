@@ -27,3 +27,8 @@ Rocky sends the message plus a compact memory context to the local model. Model 
 If the local model is unavailable, Rocky reports that clearly instead of pretending it generated an answer.
 
 This phase does not introduce autonomous web research, automatic fact promotion, model training, or arbitrary code execution.
+
+
+### Memory-grounded chat refinement
+
+Rocky's local language-model brain now receives explicit memory-status labels such as `VERIFIED`, `UNVERIFIED`, and `LEGACY`. The model is instructed to use supplied memory as its factual knowledge boundary and to say when it does not know something rather than inventing unsupported facts.
