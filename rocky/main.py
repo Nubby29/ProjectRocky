@@ -1,6 +1,7 @@
 """Command-line entry point for Project Rocky 0.9."""
 
 from .brain.memory_brain import MemoryBrain
+from .brain.model import LocalModelBrain
 from .config import load_settings
 from .learning.learner import Learner
 from .logging_config import configure_logging
@@ -36,11 +37,11 @@ def main() -> None:
     settings=load_settings(); logger=configure_logging(settings.log_file); memory=MemoryStore(settings.memory_file); memory.load()
     brain=MemoryBrain(memory); learner=Learner(memory); verifier=Verifier(memory); evaluator=SelfEvaluator(memory)
     skills=SkillRegistry(); register_builtin_skills(skills)
-    tools=ToolRegistry(); register_builtin_tools(tools)
+    tools=ToolRegistry(); register_builtin_tools(tools); model_brain=LocalModelBrain(settings.model_name, settings.model_url)
     logger.info("Rocky started")
     print("Project Rocky 0.9 — Self-Evaluation")
     print("I can learn, verify, remember, evaluate my knowledge, perform skills, and use controlled tools.")
-    print("Commands: remember <subject>: <fact> | recall <subject> | learn <subject> [source]: <source text> | verify <subject> | evaluate <subject> | ask <subject> | skills | do <skill>: <input> | tools | use <tool>: <input> | experience <kind>: <text> | memories | forget <subject> | exit")
+    print("Commands: chat <message> | remember <subject>: <fact> | recall <subject> | learn <subject> [source]: <source text> | verify <subject> | evaluate <subject> | ask <subject> | skills | do <skill>: <input> | tools | use <tool>: <input> | experience <kind>: <text> | memories | forget <subject> | exit")
     while True:
         try: user_input=input("You: ").strip()
         except (EOFError,KeyboardInterrupt): print(); break
@@ -48,7 +49,14 @@ def main() -> None:
         if not user_input: continue
         lower=user_input.casefold()
         try:
-            if lower.startswith("remember ") and ":" in user_input:
+            if lower.startswith("chat "):
+                message=user_input[len("chat "):].strip()
+                facts=memory.load().get("facts", [])
+                context="\n".join(f"{fact.get('subject')}: {fact.get('text')}" for fact in facts)
+                response=model_brain.chat(message, context)
+                memory.add_experience("conversation", f"Model {response.model} answered: {response.text}")
+                print(f"Rocky: {response.text}")
+            elif lower.startswith("remember ") and ":" in user_input:
                 subject,fact=user_input[len("remember "):].split(":",1); response=brain.remember(subject,fact); memory.add_experience("memory",f"Explicitly remembered fact about {subject.strip()}."); print(f"Rocky: {response}")
             elif lower.startswith("recall "): print(f"Rocky: {brain.recall(user_input[len('recall '):].strip())}")
             elif lower.startswith("learn ") and ":" in user_input:
@@ -78,8 +86,8 @@ def main() -> None:
                 subject=user_input[len("forget "):].strip()
                 if memory.forget_fact(subject): memory.add_experience("memory",f"Forgot facts and learning evidence about {subject}."); print(f"Rocky: I forgot facts and learning evidence about {subject}.")
                 else: print(f"Rocky: I had no facts or learning evidence to forget about {subject}.")
-            else: print("Rocky: Use 'remember', 'recall', 'learn', 'verify', 'evaluate', 'ask', 'skills', 'do', 'tools', 'use', 'experience', 'memories', or 'forget'.")
-        except (ValueError,KeyError) as exc: print(f"Rocky: I could not perform that operation: {exc}")
+            else: print("Rocky: Use 'chat', 'remember', 'recall', 'learn', 'verify', 'evaluate', 'ask', 'skills', 'do', 'tools', 'use', 'experience', 'memories', or 'forget'.")
+        except (ValueError,KeyError,RuntimeError) as exc: print(f"Rocky: I could not perform that operation: {exc}")
 
 
 if __name__ == "__main__": main()
