@@ -1,22 +1,31 @@
 # Project Rocky
 
-A small, growable AI designed to learn what it does not know, verify new knowledge, remember it, and improve over time.
+A small, growable AI designed to detect what it does not know, learn new information, verify it, remember it, and improve over time.
 
 ## Current milestone
 
-**Rocky 0.1 — The Seed**
+Rocky 0.7 — Doing
 
-Phase 1 establishes the project foundation: configuration, package structure, persistent memory primitives, a command-line entry point, logging, and tests.
+Rocky now adds a reusable skill layer on top of its learning, verification, and memory systems. Skills are deterministic actions with a name, description, and executable handler.
 
-## Roadmap
+Built-in skills:
+- **echo** — returns text unchanged;
+- **uppercase** — converts text to uppercase;
+- **lowercase** — converts text to lowercase;
+- **length** — counts characters.
 
-- 0.1 — The Seed
-- 0.2 — First Thought
-- 0.3 — Knowing
-- 0.4 — Learning
-- 0.5 — Verification
-- 0.6 — Remembering
-- 0.7 — Doing
-- 0.8 — Tools
-- 0.9 — Self-Evaluation
-- 1.0 — Growing Brain
+### Run
+
+    python -m rocky.main
+
+### Examples
+
+    skills
+    do echo: hello Rocky
+    do uppercase: rocky can do things
+    do length: hello
+    memories
+
+Every skill execution is recorded as an episodic experience. The registry is intentionally small and deterministic so future phases can add learned skills, tools, and safer action policies without coupling them to the CLI.
+
+Existing learning and verification commands remain available. This phase does not execute arbitrary Python, shell commands, or external actions.
