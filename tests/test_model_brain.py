@@ -84,4 +84,4 @@ def test_model_brain_chat_image_builds_vision_request(monkeypatch, tmp_path):
 def test_model_brain_normalizes_carriage_returns():
     from rocky.brain.model import clean_model_text
 
-    assert clean_model_text("first\\rsecond") == "first\\nsecond"
+    assert clean_model_text("first\rsecond") == "first\nsecond"
