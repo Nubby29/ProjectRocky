@@ -1,4 +1,4 @@
-"""Command-line entry point for Project Rocky 0.9."""
+"""Command-line entry point for Project Rocky 1.0."""
 
 from .brain.memory_brain import MemoryBrain
 from .brain.model import LocalModelBrain
@@ -39,8 +39,8 @@ def main() -> None:
     skills=SkillRegistry(); register_builtin_skills(skills)
     tools=ToolRegistry(); register_builtin_tools(tools); model_brain=LocalModelBrain(settings.model_name, settings.model_url)
     logger.info("Rocky started")
-    print("Project Rocky 0.9 — Self-Evaluation")
-    print("I can learn, verify, remember, evaluate my knowledge, perform skills, and use controlled tools.")
+    print("Project Rocky 1.0 — Growing Brain")
+    print("I can learn, verify, remember, evaluate my knowledge, perform skills, use controlled tools, and chat through a local language model.")
     print("Commands: chat <message> | remember <subject>: <fact> | recall <subject> | learn <subject> [source]: <source text> | verify <subject> | evaluate <subject> | ask <subject> | skills | do <skill>: <input> | tools | use <tool>: <input> | experience <kind>: <text> | memories | forget <subject> | exit")
     while True:
         try: user_input=input("You: ").strip()
