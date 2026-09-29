@@ -1,22 +1,37 @@
 # Project Rocky
 
-A small, growable AI designed to learn what it does not know, verify new knowledge, remember it, and improve over time.
+A small, growable AI designed to detect what it does not know, learn new information, verify it, remember it, improve over time, and perform controlled actions.
 
 ## Current milestone
 
-**Rocky 0.1 — The Seed**
+Rocky 0.9 — Self-Evaluation
 
-Phase 1 establishes the project foundation: configuration, package structure, persistent memory primitives, a command-line entry point, logging, and tests.
+Rocky can now inspect its own stored knowledge before answering. Self-evaluation uses explicit memory state rather than pretending to measure real-world truth.
 
-## Roadmap
+### Knowledge states
 
-- 0.1 — The Seed
-- 0.2 — First Thought
-- 0.3 — Knowing
-- 0.4 — Learning
-- 0.5 — Verification
-- 0.6 — Remembering
-- 0.7 — Doing
-- 0.8 — Tools
-- 0.9 — Self-Evaluation
-- 1.0 — Growing Brain
+- **VERIFIED (1.00)** — an explicitly verified fact is stored;
+- **UNVERIFIED (0.50)** — evidence exists but is not verified;
+- **LEGACY (0.25)** — older fact exists without verification metadata;
+- **UNKNOWN (0.00)** — no stored knowledge or evidence;
+- **CONFLICT (0.00)** — stored sources disagree.
+
+These values are deterministic memory-status signals, not probabilities that a statement is objectively true.
+
+### Run
+
+    python -m rocky.main
+
+### Examples
+
+    evaluate Python
+    evaluate Java
+    ask Python
+
+The `ask` flow now checks self-evaluation and refuses to present conflicting evidence as verified knowledge. Evaluation events are recorded in episodic memory.
+
+Existing learning, verification, memory, skills, and controlled tools remain available.
+
+## Safety boundary
+
+Rocky still does not execute arbitrary Python or shell commands, and it does not claim that a confidence value guarantees real-world truth.
