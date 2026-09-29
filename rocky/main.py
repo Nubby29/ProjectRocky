@@ -1,4 +1,4 @@
-"""Command-line entry point for Project Rocky 1.0."""
+"""Command-line entry point for Project Rocky 1.5."""
 
 from .brain.memory_brain import MemoryBrain
 from .brain.model import LocalModelBrain
@@ -52,9 +52,9 @@ def main() -> None:
     skills=SkillRegistry(); register_builtin_skills(skills)
     tools=ToolRegistry(); register_builtin_tools(tools); model_brain=LocalModelBrain(settings.model_name, settings.model_url)
     logger.info("Rocky started")
-    print("Project Rocky 1.0 — Growing Brain")
-    print("I can learn, verify, remember, evaluate my knowledge, perform skills, use controlled tools, and chat through a local language model.")
-    print("Commands: chat <message> | remember <subject>: <fact> | recall <subject> | learn <subject> [source]: <source text> | verify <subject> | evaluate <subject> | ask <subject> | skills | do <skill>: <input> | tools | use <tool>: <input> | experience <kind>: <text> | memories | forget <subject> | exit")
+    print("Project Rocky 1.5 — Multimodal")
+    print("I can learn, verify, remember, evaluate my knowledge, perform skills, use controlled tools, and chat with text or images through local models.")
+    print("Commands: chat <message> | chat-image <image-path>: <message> | remember <subject>: <fact> | recall <subject> | learn <subject> [source]: <source text> | verify <subject> | evaluate <subject> | ask <subject> | skills | do <skill>: <input> | tools | use <tool>: <input> | experience <kind>: <text> | memories | forget <subject> | exit")
     while True:
         try: user_input=input("You: ").strip()
         except (EOFError,KeyboardInterrupt): print(); break
@@ -62,7 +62,13 @@ def main() -> None:
         if not user_input: continue
         lower=user_input.casefold()
         try:
-            if lower.startswith("chat "):
+            if lower.startswith("chat-image ") and ":" in user_input:
+                image_path, message = user_input[len("chat-image "):].rsplit(":", 1)
+                context=build_model_context(memory)
+                response=model_brain.chat_image(message, image_path, context)
+                memory.add_experience("conversation", f"Vision model {response.model} analyzed {image_path.strip()}: {response.text}")
+                print(f"Rocky: {response.text}")
+            elif lower.startswith("chat "):
                 message=user_input[len("chat "):].strip()
                 context=build_model_context(memory)
                 response=model_brain.chat(message, context)
