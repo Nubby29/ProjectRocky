@@ -1,22 +1,28 @@
 # Project Rocky
 
-A small, growable AI designed to learn what it does not know, verify new knowledge, remember it, and improve over time.
+A small, growable AI designed to detect what it does not know, learn new information, verify it, remember it, improve over time, and perform controlled actions.
 
 ## Current milestone
 
-**Rocky 0.1 — The Seed**
+Rocky 0.8 — Tools
 
-Phase 1 establishes the project foundation: configuration, package structure, persistent memory primitives, a command-line entry point, logging, and tests.
+Rocky now has a controlled tool layer alongside its reusable skills.
 
-## Roadmap
+Built-in tools:
+- **calculate** — safely evaluates numeric arithmetic using an allowlisted AST;
+- **read_file** — reads a UTF-8 text file from a supplied path.
 
-- 0.1 — The Seed
-- 0.2 — First Thought
-- 0.3 — Knowing
-- 0.4 — Learning
-- 0.5 — Verification
-- 0.6 — Remembering
-- 0.7 — Doing
-- 0.8 — Tools
-- 0.9 — Self-Evaluation
-- 1.0 — Growing Brain
+### Run
+
+    python -m rocky.main
+
+### Examples
+
+    tools
+    use calculate: 25 * 4 + 10
+    use read_file: notes.txt
+    memories
+
+Tool executions are recorded as episodic experiences. Tools are explicitly registered and deterministic. The calculator never executes Python code, and this phase does not provide arbitrary shell/Python execution or web access.
+
+Existing learning, verification, memory, and skill commands remain available.
