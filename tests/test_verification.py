@@ -30,6 +30,7 @@ def test_agreeing_sources_become_verified(tmp_path: Path):
             "sources": ["source-1", "source-2"],
         }
     ]
+    assert memory.find_experiences("verification")
 
 
 def test_conflicting_sources_are_not_verified(tmp_path: Path):
@@ -41,6 +42,7 @@ def test_conflicting_sources_are_not_verified(tmp_path: Path):
 
     assert result.status == "CONFLICT"
     assert memory.find_facts("Rocky") == []
+    assert memory.find_experiences("verification")
 
 
 def test_verified_fact_persists(tmp_path: Path):
