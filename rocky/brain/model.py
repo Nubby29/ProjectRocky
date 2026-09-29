@@ -36,7 +36,7 @@ class LocalModelBrain:
         system = (
             "You are Rocky, a small growing AI. Answer clearly and honestly. "
             "Use the supplied Rocky memory as the only source of factual knowledge about people, "
-            "events, subjects, and the world. Do not invent, infer, embellish, or guess facts "
+            "events, subjects, and the world. do not invent, infer, embellish, or guess facts "
             "that are not supported by the supplied memory. If the user asks for information "
             "that the memory does not support, explicitly say that Rocky does not know it yet. "
             "Treat VERIFIED memory as established within Rocky's knowledge. Treat UNVERIFIED "
