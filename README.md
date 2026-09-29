@@ -4,38 +4,28 @@ A small, growable AI designed to detect what it does not know, learn new informa
 
 ## Current milestone
 
-Rocky 0.6 — Remembering
+Rocky 0.7 — Doing
 
-Rocky now has three practical memory layers:
-- **facts** — knowledge Rocky can recall;
-- **experiences** — timestamped events describing what Rocky learned, verified, remembered, or forgot;
-- **evidence** — source material that has not necessarily become verified knowledge.
+Rocky now adds a reusable skill layer on top of its learning, verification, and memory systems. Skills are deterministic actions with a name, description, and executable handler.
 
-Rocky can now:
-- detect whether a subject is already known;
-- collect explicitly supplied learning evidence;
-- compare multiple supplied sources deterministically;
-- mark agreeing evidence as VERIFIED;
-- keep single-source evidence UNVERIFIED;
-- refuse to promote conflicting sources to verified knowledge;
-- persist verified facts with their source labels;
-- record a timestamped learning and verification history;
-- inspect its current memory with the memories command;
-- store a manual experience with experience <kind>: <text>;
-- forget a subject's facts and evidence with forget <subject>.
+Built-in skills:
+- **echo** — returns text unchanged;
+- **uppercase** — converts text to uppercase;
+- **lowercase** — converts text to lowercase;
+- **length** — counts characters.
 
 ### Run
 
     python -m rocky.main
 
-### Example
+### Examples
 
-    learn Java [source-1]: Java is a programming language.
-    learn Java [source-2]: Java is a programming language.
-    verify Java
-    ask Java
+    skills
+    do echo: hello Rocky
+    do uppercase: rocky can do things
+    do length: hello
     memories
 
-The memories command shows stored facts plus the most recent experiences. The forget command removes that subject's facts and evidence while leaving the experience history intact, so Rocky does not erase the fact that an earlier learning event occurred.
+Every skill execution is recorded as an episodic experience. The registry is intentionally small and deterministic so future phases can add learned skills, tools, and safer action policies without coupling them to the CLI.
 
-This phase still does not browse the web, choose authoritative sources, or perform semantic reasoning. The memory system is deliberately explicit and auditable so later autonomous learning can build on it safely.
+Existing learning and verification commands remain available. This phase does not execute arbitrary Python, shell commands, or external actions.
