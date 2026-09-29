@@ -5,6 +5,7 @@ from .config import load_settings
 from .learning.learner import Learner
 from .logging_config import configure_logging
 from .memory.store import MemoryStore
+from .reasoning.self_evaluator import SelfEvaluator
 from .skills.builtin import register_builtin_skills
 from .skills.registry import SkillRegistry
 from .tools.builtin import register_builtin_tools
@@ -33,13 +34,13 @@ def print_memory(memory: MemoryStore) -> None:
 
 def main() -> None:
     settings=load_settings(); logger=configure_logging(settings.log_file); memory=MemoryStore(settings.memory_file); memory.load()
-    brain=MemoryBrain(memory); learner=Learner(memory); verifier=Verifier(memory)
+    brain=MemoryBrain(memory); learner=Learner(memory); verifier=Verifier(memory); evaluator=SelfEvaluator(memory)
     skills=SkillRegistry(); register_builtin_skills(skills)
     tools=ToolRegistry(); register_builtin_tools(tools)
     logger.info("Rocky started")
     print("Project Rocky 0.8 — Tools")
     print("I can learn, verify, remember, perform skills, and use controlled tools.")
-    print("Commands: remember <subject>: <fact> | recall <subject> | learn <subject> [source]: <source text> | verify <subject> | ask <subject> | skills | do <skill>: <input> | tools | use <tool>: <input> | experience <kind>: <text> | memories | forget <subject> | exit")
+    print("Commands: remember <subject>: <fact> | recall <subject> | learn <subject> [source]: <source text> | verify <subject> | evaluate <subject> | ask <subject> | skills | do <skill>: <input> | tools | use <tool>: <input> | experience <kind>: <text> | memories | forget <subject> | exit")
     while True:
         try: user_input=input("You: ").strip()
         except (EOFError,KeyboardInterrupt): print(); break
@@ -53,9 +54,14 @@ def main() -> None:
             elif lower.startswith("learn ") and ":" in user_input:
                 subject,text,source=parse_learn_command(user_input[len("learn "):]); print(f"Rocky: {learner.learn(subject,text,source).message}")
             elif lower.startswith("verify "): print(f"Rocky: {verifier.verify(user_input[len('verify '):].strip()).message}")
+            elif lower.startswith("evaluate "):
+                result=evaluator.evaluate(user_input[len("evaluate "):].strip())
+                print(f"Rocky: {result.subject} — status={result.status}, confidence={result.confidence:.2f}. {result.reason}")
+                memory.add_experience("self-evaluation", f"Evaluated {result.subject}: {result.status} ({result.confidence:.2f}).")
             elif lower.startswith("ask "):
-                subject=user_input[len("ask "):].strip(); result=learner.learn_if_unknown(subject)
+                subject=user_input[len("ask "):].strip(); evaluation=evaluator.evaluate(subject); result=learner.learn_if_unknown(subject)
                 if result.status=="UNKNOWN": print(f"Rocky: {result.message}\nRocky: Provide a source with: learn <subject> [source]: <source text>")
+                elif evaluation.status=="CONFLICT": print(f"Rocky: I found conflicting information about {subject}, so I will not present it as verified knowledge.")
                 else: print(f"Rocky: {brain.recall(subject)}")
             elif lower=="skills":
                 print("Rocky: Available skills:"); [print(f"  {x.name}: {x.description}") for x in skills.list()]
@@ -72,7 +78,7 @@ def main() -> None:
                 subject=user_input[len("forget "):].strip()
                 if memory.forget_fact(subject): memory.add_experience("memory",f"Forgot facts and learning evidence about {subject}."); print(f"Rocky: I forgot facts and learning evidence about {subject}.")
                 else: print(f"Rocky: I had no facts or learning evidence to forget about {subject}.")
-            else: print("Rocky: Use 'remember', 'recall', 'learn', 'verify', 'ask', 'skills', 'do', 'tools', 'use', 'experience', 'memories', or 'forget'.")
+            else: print("Rocky: Use 'remember', 'recall', 'learn', 'verify', 'evaluate', 'ask', 'skills', 'do', 'tools', 'use', 'experience', 'memories', or 'forget'.")
         except (ValueError,KeyError) as exc: print(f"Rocky: I could not perform that operation: {exc}")
 
 
