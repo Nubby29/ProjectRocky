@@ -24,9 +24,11 @@ class Learner:
         if not subject or not source_text or not source:
             raise ValueError("subject, source text, and source are required")
 
-        if self.memory.find_facts(subject):
-            return LearningResult("KNOWN", subject, f"I already know something about {subject}.")
+        facts = self.memory.find_facts(subject)
+        if any(fact.get("verification") == "VERIFIED" for fact in facts):
+            return LearningResult("KNOWN", subject, f"I already know verified information about {subject}.")
 
+        # Legacy Rocky 0.3 facts remain readable but can receive Phase 4 evidence.
         self.memory.add_evidence(subject, source_text, source)
         count = len(self.memory.find_evidence(subject))
         return LearningResult(
@@ -39,8 +41,11 @@ class Learner:
         self, subject: str, source_text: str | None = None, source: str = "user-supplied"
     ) -> LearningResult:
         subject = subject.strip()
-        if self.memory.find_facts(subject):
-            return LearningResult("KNOWN", subject, f"I already know something about {subject}.")
+        facts = self.memory.find_facts(subject)
+        if any(fact.get("verification") == "VERIFIED" for fact in facts):
+            return LearningResult("KNOWN", subject, f"I already know verified information about {subject}.")
+        if facts and not source_text:
+            return LearningResult("UNVERIFIED", subject, f"I have older knowledge about {subject}, but it has not been verified yet.")
         if not source_text:
             return LearningResult(
                 "UNKNOWN",
