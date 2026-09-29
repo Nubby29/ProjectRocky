@@ -41,3 +41,27 @@ def test_duplicate_evidence_is_not_stored_twice(tmp_path: Path):
     store.add_evidence("Python", "Python is a language.", "source-1")
 
     assert len(store.find_evidence("Python")) == 1
+
+
+def test_experience_is_timestamped_and_persistent(tmp_path: Path):
+    path = tmp_path / "memory.json"
+    store = MemoryStore(path)
+    experience = store.add_experience("learning", "Rocky learned about Java.")
+
+    assert experience["kind"] == "learning"
+    assert experience["text"] == "Rocky learned about Java."
+    assert experience["timestamp"]
+
+    reloaded = MemoryStore(path)
+    assert reloaded.find_experiences("learning") == [experience]
+
+
+def test_forget_fact_removes_fact_and_evidence(tmp_path: Path):
+    store = MemoryStore(tmp_path / "memory.json")
+    store.remember_verified_fact("Java", "Java is a language.", [])
+    store.add_evidence("Java", "Java is a language.", "source-1")
+
+    assert store.forget_fact("java") is True
+    assert store.find_facts("Java") == []
+    assert store.find_evidence("Java") == []
+    assert store.forget_fact("Java") is False
