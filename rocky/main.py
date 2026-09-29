@@ -1,10 +1,11 @@
-"""Command-line entry point for Project Rocky 0.3."""
+"""Command-line entry point for Project Rocky 0.4."""
 
 from .brain.memory_brain import MemoryBrain
 from .config import load_settings
 from .learning.learner import Learner
 from .logging_config import configure_logging
 from .memory.store import MemoryStore
+from .verification.verifier import Verifier
 
 
 def main() -> None:
@@ -14,11 +15,12 @@ def main() -> None:
     memory.load()
     brain = MemoryBrain(memory)
     learner = Learner(memory)
+    verifier = Verifier(memory)
     logger.info("Rocky started")
 
-    print("Project Rocky 0.3 — Learning")
-    print("I can detect unknown subjects and learn from an explicitly supplied source.")
-    print("Commands: remember <subject>: <fact> | recall <subject> | learn <subject>: <source text> | ask <subject> | exit")
+    print("Project Rocky 0.4 — Verification")
+    print("I can learn candidate information, compare supplied sources, and store only verified knowledge as facts.")
+    print("Commands: remember <subject>: <fact> | recall <subject> | learn <subject>: <source text> | verify <subject> | ask <subject> | exit")
 
     while True:
         try:
@@ -47,11 +49,19 @@ def main() -> None:
             command = user_input[len("learn "):]
             subject, source_text = command.split(":", 1)
             try:
-                result = learner.learn_if_unknown(subject, source_text)
+                result = learner.learn(subject, source_text)
                 print(f"Rocky: {result.message}")
                 logger.info("Learning result=%s subject=%s", result.status, subject.strip())
             except ValueError as exc:
                 print(f"Rocky: I could not learn that: {exc}")
+        elif lower.startswith("verify "):
+            subject = user_input[len("verify "):].strip()
+            try:
+                result = verifier.verify(subject)
+                print(f"Rocky: {result.message}")
+                logger.info("Verification result=%s subject=%s", result.status, subject)
+            except ValueError as exc:
+                print(f"Rocky: I could not verify that: {exc}")
         elif lower.startswith("ask "):
             subject = user_input[len("ask "):].strip()
             result = learner.learn_if_unknown(subject)
@@ -61,7 +71,8 @@ def main() -> None:
             else:
                 print(f"Rocky: {brain.recall(subject)}")
         else:
-            print("Rocky: Use 'remember', 'recall', 'learn', or 'ask'.")
+            print("Rocky: Use 'remember', 'recall', 'learn', 'verify', or 'ask'.")
+
 
 if __name__ == "__main__":
     main()
