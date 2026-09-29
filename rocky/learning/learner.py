@@ -1,4 +1,4 @@
-"""Learning pipeline for Rocky 0.4."""
+"""Learning pipeline for Rocky 0.6."""
 
 from dataclasses import dataclass
 from rocky.memory.store import MemoryStore
@@ -28,8 +28,11 @@ class Learner:
         if any(fact.get("verification") == "VERIFIED" for fact in facts):
             return LearningResult("KNOWN", subject, f"I already know verified information about {subject}.")
 
-        # Legacy Rocky 0.3 facts remain readable but can receive Phase 4 evidence.
         self.memory.add_evidence(subject, source_text, source)
+        self.memory.add_experience(
+            "learning",
+            f"Collected evidence for {subject} from {source}: {source_text}",
+        )
         count = len(self.memory.find_evidence(subject))
         return LearningResult(
             "UNVERIFIED",
