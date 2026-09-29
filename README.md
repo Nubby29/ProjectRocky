@@ -4,17 +4,25 @@ A small, growable AI designed to detect what it does not know, learn new informa
 
 ## Current milestone
 
-Rocky 0.4 — Verification
+Rocky 0.6 — Remembering
+
+Rocky now has three practical memory layers:
+- **facts** — knowledge Rocky can recall;
+- **experiences** — timestamped events describing what Rocky learned, verified, remembered, or forgot;
+- **evidence** — source material that has not necessarily become verified knowledge.
 
 Rocky can now:
 - detect whether a subject is already known;
 - collect explicitly supplied learning evidence;
-- keep evidence separate from verified knowledge;
 - compare multiple supplied sources deterministically;
 - mark agreeing evidence as VERIFIED;
 - keep single-source evidence UNVERIFIED;
 - refuse to promote conflicting sources to verified knowledge;
-- persist verified facts with their source labels.
+- persist verified facts with their source labels;
+- record a timestamped learning and verification history;
+- inspect its current memory with the memories command;
+- store a manual experience with experience <kind>: <text>;
+- forget a subject's facts and evidence with forget <subject>.
 
 ### Run
 
@@ -22,12 +30,12 @@ Rocky can now:
 
 ### Example
 
-    learn Python: Python is a programming language.
-    verify Python
-    learn Python: Python is a programming language.
-    verify Python
-    ask Python
+    learn Java [source-1]: Java is a programming language.
+    learn Java [source-2]: Java is a programming language.
+    verify Java
+    ask Java
+    memories
 
-The first verification remains UNVERIFIED because Rocky has only one source. After a second agreeing source is supplied, Rocky marks the knowledge VERIFIED and stores it as a fact. If supplied sources disagree, Rocky reports CONFLICT and does not promote the information to verified knowledge.
+The memories command shows stored facts plus the most recent experiences. The forget command removes that subject's facts and evidence while leaving the experience history intact, so Rocky does not erase the fact that an earlier learning event occurred.
 
-This phase uses deterministic comparison only. It does not browse the web, decide whether a real-world source is authoritative, or resolve semantic disagreements. Those capabilities belong to later research and reasoning milestones.
+This phase still does not browse the web, choose authoritative sources, or perform semantic reasoning. The memory system is deliberately explicit and auditable so later autonomous learning can build on it safely.
