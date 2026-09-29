@@ -4,14 +4,17 @@ A small, growable AI designed to detect what it does not know, learn new informa
 
 ## Current milestone
 
-Rocky 0.3 — Learning
+Rocky 0.4 — Verification
 
 Rocky can now:
 - detect whether a subject is already known;
-- report an unknown subject;
-- learn from an explicitly supplied source;
-- store the learned information persistently;
-- report KNOWN, UNKNOWN, or LEARNED states.
+- collect explicitly supplied learning evidence;
+- keep evidence separate from verified knowledge;
+- compare multiple supplied sources deterministically;
+- mark agreeing evidence as VERIFIED;
+- keep single-source evidence UNVERIFIED;
+- refuse to promote conflicting sources to verified knowledge;
+- persist verified facts with their source labels.
 
 ### Run
 
@@ -19,8 +22,12 @@ Rocky can now:
 
 ### Example
 
-    ask Python
     learn Python: Python is a programming language.
+    verify Python
+    learn Python: Python is a programming language.
+    verify Python
     ask Python
 
-The current learner intentionally requires a supplied source. It does not yet browse the web or automatically judge whether a source is trustworthy. Verification and external research are later milestones.
+The first verification remains UNVERIFIED because Rocky has only one source. After a second agreeing source is supplied, Rocky marks the knowledge VERIFIED and stores it as a fact. If supplied sources disagree, Rocky reports CONFLICT and does not promote the information to verified knowledge.
+
+This phase uses deterministic comparison only. It does not browse the web, decide whether a real-world source is authoritative, or resolve semantic disagreements. Those capabilities belong to later research and reasoning milestones.
