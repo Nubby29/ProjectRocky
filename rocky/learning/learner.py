@@ -1,4 +1,4 @@
-"""First learning loop for Rocky 0.3."""
+"""Learning pipeline for Rocky 0.4."""
 
 from dataclasses import dataclass
 from rocky.memory.store import MemoryStore
@@ -12,22 +12,39 @@ class LearningResult:
 
 
 class Learner:
-    """Learns from an explicitly supplied source and stores the result."""
+    """Collects supplied evidence without treating it as verified fact."""
 
     def __init__(self, memory: MemoryStore):
         self.memory = memory
 
-    def learn(self, subject: str, source_text: str) -> LearningResult:
+    def learn(self, subject: str, source_text: str, source: str = "user-supplied") -> LearningResult:
         subject = subject.strip()
         source_text = source_text.strip()
-        if not subject or not source_text:
-            raise ValueError("subject and source text are required")
-        self.memory.remember_fact(subject, source_text)
-        return LearningResult("LEARNED", subject, f"I learned about {subject}: {source_text}")
+        source = source.strip()
+        if not subject or not source_text or not source:
+            raise ValueError("subject, source text, and source are required")
 
-    def learn_if_unknown(self, subject: str, source_text: str | None = None) -> LearningResult:
+        if self.memory.find_facts(subject):
+            return LearningResult("KNOWN", subject, f"I already know something about {subject}.")
+
+        self.memory.add_evidence(subject, source_text, source)
+        count = len(self.memory.find_evidence(subject))
+        return LearningResult(
+            "UNVERIFIED",
+            subject,
+            f"I learned a candidate fact about {subject}, but it is not verified yet ({count} source{'s' if count != 1 else ''}).",
+        )
+
+    def learn_if_unknown(
+        self, subject: str, source_text: str | None = None, source: str = "user-supplied"
+    ) -> LearningResult:
+        subject = subject.strip()
         if self.memory.find_facts(subject):
             return LearningResult("KNOWN", subject, f"I already know something about {subject}.")
         if not source_text:
-            return LearningResult("UNKNOWN", subject.strip(), f"I don't know {subject.strip()} yet, and no learning source was provided.")
-        return self.learn(subject, source_text)
+            return LearningResult(
+                "UNKNOWN",
+                subject,
+                f"I don't know {subject} yet, and no learning source was provided.",
+            )
+        return self.learn(subject, source_text, source)
