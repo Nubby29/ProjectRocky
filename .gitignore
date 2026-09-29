@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Rocky runtime data
+runtime/
+logs/
+
+# Editors
+.vscode/
+.idea/

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "project-rocky"
+version = "0.1.0"
+description = "A small, growable AI with persistent memory and a learning architecture."
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+rocky = "rocky.main:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
