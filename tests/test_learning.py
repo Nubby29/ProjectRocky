@@ -20,6 +20,7 @@ def test_learning_stores_evidence_but_not_fact(tmp_path: Path):
     assert memory.find_evidence("python") == [
         {"subject": "Python", "text": "Python is a programming language.", "source": "source-1"}
     ]
+    assert memory.find_experiences("learning")
 
 
 def test_known_subject_is_not_relearned(tmp_path: Path):
