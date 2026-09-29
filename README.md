@@ -4,13 +4,19 @@ A small, growable AI designed to detect what it does not know, learn new informa
 
 ## Current milestone
 
-Rocky 0.8 — Tools
+Rocky 0.9 — Self-Evaluation
 
-Rocky now has a controlled tool layer alongside its reusable skills.
+Rocky can now inspect its own stored knowledge before answering. Self-evaluation uses explicit memory state rather than pretending to measure real-world truth.
 
-Built-in tools:
-- **calculate** — safely evaluates numeric arithmetic using an allowlisted AST;
-- **read_file** — reads a UTF-8 text file from a supplied path.
+### Knowledge states
+
+- **VERIFIED (1.00)** — an explicitly verified fact is stored;
+- **UNVERIFIED (0.50)** — evidence exists but is not verified;
+- **LEGACY (0.25)** — older fact exists without verification metadata;
+- **UNKNOWN (0.00)** — no stored knowledge or evidence;
+- **CONFLICT (0.00)** — stored sources disagree.
+
+These values are deterministic memory-status signals, not probabilities that a statement is objectively true.
 
 ### Run
 
@@ -18,11 +24,14 @@ Built-in tools:
 
 ### Examples
 
-    tools
-    use calculate: 25 * 4 + 10
-    use read_file: notes.txt
-    memories
+    evaluate Python
+    evaluate Java
+    ask Python
 
-Tool executions are recorded as episodic experiences. Tools are explicitly registered and deterministic. The calculator never executes Python code, and this phase does not provide arbitrary shell/Python execution or web access.
+The `ask` flow now checks self-evaluation and refuses to present conflicting evidence as verified knowledge. Evaluation events are recorded in episodic memory.
 
-Existing learning, verification, memory, and skill commands remain available.
+Existing learning, verification, memory, skills, and controlled tools remain available.
+
+## Safety boundary
+
+Rocky still does not execute arbitrary Python or shell commands, and it does not claim that a confidence value guarantees real-world truth.
