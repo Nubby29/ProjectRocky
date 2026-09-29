@@ -1,18 +1,16 @@
 # Project Rocky
 
-A small, growable AI designed to detect what it does not know, learn new information, verify it, remember it, and improve over time.
+A small, growable AI designed to detect what it does not know, learn new information, verify it, remember it, improve over time, and perform controlled actions.
 
 ## Current milestone
 
-Rocky 0.7 — Doing
+Rocky 0.8 — Tools
 
-Rocky now adds a reusable skill layer on top of its learning, verification, and memory systems. Skills are deterministic actions with a name, description, and executable handler.
+Rocky now has a controlled tool layer alongside its reusable skills.
 
-Built-in skills:
-- **echo** — returns text unchanged;
-- **uppercase** — converts text to uppercase;
-- **lowercase** — converts text to lowercase;
-- **length** — counts characters.
+Built-in tools:
+- **calculate** — safely evaluates numeric arithmetic using an allowlisted AST;
+- **read_file** — reads a UTF-8 text file from a supplied path.
 
 ### Run
 
@@ -20,12 +18,11 @@ Built-in skills:
 
 ### Examples
 
-    skills
-    do echo: hello Rocky
-    do uppercase: rocky can do things
-    do length: hello
+    tools
+    use calculate: 25 * 4 + 10
+    use read_file: notes.txt
     memories
 
-Every skill execution is recorded as an episodic experience. The registry is intentionally small and deterministic so future phases can add learned skills, tools, and safer action policies without coupling them to the CLI.
+Tool executions are recorded as episodic experiences. Tools are explicitly registered and deterministic. The calculator never executes Python code, and this phase does not provide arbitrary shell/Python execution or web access.
 
-Existing learning and verification commands remain available. This phase does not execute arbitrary Python, shell commands, or external actions.
+Existing learning, verification, memory, and skill commands remain available.
