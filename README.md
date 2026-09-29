@@ -1,22 +1,57 @@
 # Project Rocky
 
-A small, growable AI designed to learn what it does not know, verify new knowledge, remember it, and improve over time.
+A small, growable AI designed to detect what it does not know, learn new information, verify it, remember it, improve over time, and perform controlled actions.
 
-## Current milestone
+## Rocky 1.0 — Growing Brain
 
-**Rocky 0.1 — The Seed**
+Rocky now has an optional local language-model brain through an Ollama-compatible API. The model is a generation/reasoning layer; Rocky's persistent memory, verification, self-evaluation, skills, and tools remain separate subsystems.
 
-Phase 1 establishes the project foundation: configuration, package structure, persistent memory primitives, a command-line entry point, logging, and tests.
+Default model: `llama3.2:3b`
+Default endpoint: `http://127.0.0.1:11434`
 
-## Roadmap
+Override with environment variables:
 
-- 0.1 — The Seed
-- 0.2 — First Thought
-- 0.3 — Knowing
-- 0.4 — Learning
-- 0.5 — Verification
-- 0.6 — Remembering
-- 0.7 — Doing
-- 0.8 — Tools
-- 0.9 — Self-Evaluation
-- 1.0 — Growing Brain
+    $env:ROCKY_MODEL="your-model"
+    $env:ROCKY_MODEL_URL="http://127.0.0.1:11434"
+
+Run:
+
+    python -m rocky.main
+
+Then use:
+
+    chat <message>
+
+Rocky sends the message plus a compact memory context to the local model. Model responses are recorded as `conversation` experiences, but the model does **not** automatically write new facts into verified memory.
+
+If the local model is unavailable, Rocky reports that clearly instead of pretending it generated an answer.
+
+This phase does not introduce autonomous web research, automatic fact promotion, model training, or arbitrary code execution.
+
+
+### Memory-grounded chat refinement
+
+Rocky's local language-model brain now receives explicit memory-status labels such as `VERIFIED`, `UNVERIFIED`, and `LEGACY`. The model is instructed to use supplied memory as its factual knowledge boundary and to say when it does not know something rather than inventing unsupported facts.
+
+
+## Rocky 1.5 — Multimodal
+
+Rocky can optionally send local images to an Ollama-compatible vision model while keeping its persistent memory separate from generated responses.
+
+Default vision model: `llama3.2-vision:11b`
+
+Override with:
+
+    $env:ROCKY_VISION_MODEL="your-vision-model"
+
+Use:
+
+    chat-image <image-path>: <message>
+
+For example:
+
+    chat-image C:\Images\rocky.png: Describe this image.
+
+The image is read locally and sent as base64 image data to the configured Ollama-compatible endpoint. Rocky does not automatically store visual observations as verified facts.
+
+This phase also normalizes carriage returns in model output so a model response cannot overwrite the command prompt in a terminal.
