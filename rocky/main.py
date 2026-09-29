@@ -8,6 +8,24 @@ from .memory.store import MemoryStore
 from .verification.verifier import Verifier
 
 
+def parse_learn_command(command: str) -> tuple[str, str, str]:
+    """Parse 'subject [source]: text', keeping a default source for simple use."""
+    subject_and_source, source_text = command.split(":", 1)
+    subject_and_source = subject_and_source.strip()
+    source_text = source_text.strip()
+    source = "user-supplied"
+
+    if subject_and_source.endswith("]") and "[" in subject_and_source:
+        subject, source_part = subject_and_source.rsplit("[", 1)
+        subject = subject.strip()
+        source = source_part[:-1].strip()
+        if not subject or not source:
+            raise ValueError("learn format must be: learn <subject> [source]: <source text>")
+        return subject, source_text, source
+
+    return subject_and_source, source_text, source
+
+
 def main() -> None:
     settings = load_settings()
     logger = configure_logging(settings.log_file)
@@ -20,7 +38,7 @@ def main() -> None:
 
     print("Project Rocky 0.4 — Verification")
     print("I can learn candidate information, compare supplied sources, and store only verified knowledge as facts.")
-    print("Commands: remember <subject>: <fact> | recall <subject> | learn <subject>: <source text> | verify <subject> | ask <subject> | exit")
+    print("Commands: remember <subject>: <fact> | recall <subject> | learn <subject> [source]: <source text> | verify <subject> | ask <subject> | exit")
 
     while True:
         try:
@@ -47,9 +65,9 @@ def main() -> None:
             print(f"Rocky: {brain.recall(subject)}")
         elif lower.startswith("learn ") and ":" in user_input:
             command = user_input[len("learn "):]
-            subject, source_text = command.split(":", 1)
             try:
-                result = learner.learn(subject, source_text)
+                subject, source_text, source = parse_learn_command(command)
+                result = learner.learn(subject, source_text, source)
                 print(f"Rocky: {result.message}")
                 logger.info("Learning result=%s subject=%s", result.status, subject.strip())
             except ValueError as exc:
@@ -67,7 +85,7 @@ def main() -> None:
             result = learner.learn_if_unknown(subject)
             if result.status == "UNKNOWN":
                 print(f"Rocky: {result.message}")
-                print("Rocky: Provide a source with: learn <subject>: <source text>")
+                print("Rocky: Provide a source with: learn <subject> [source]: <source text>")
             else:
                 print(f"Rocky: {brain.recall(subject)}")
         else:
