@@ -28,3 +28,14 @@ def test_known_subject_is_not_relearned(tmp_path: Path):
     learner = Learner(memory)
     result = learner.learn_if_unknown("Python", "Different source.", "source-2")
     assert result.status == "KNOWN"
+
+
+def test_legacy_fact_can_receive_verification_evidence(tmp_path: Path):
+    memory = MemoryStore(tmp_path / "memory.json")
+    memory.remember_fact("Python", "Python is a programming language.")
+    learner = Learner(memory)
+
+    result = learner.learn_if_unknown("Python", "Python is a programming language.", "source-1")
+
+    assert result.status == "UNVERIFIED"
+    assert len(memory.find_evidence("Python")) == 1
