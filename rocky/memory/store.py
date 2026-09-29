@@ -1,6 +1,7 @@
-"""Persistent JSON-backed memory for Rocky 0.4."""
+"""Persistent JSON-backed memory for Rocky 0.6."""
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -117,3 +118,53 @@ class MemoryStore:
             item for item in data["evidence"]
             if subject in item.get("subject", "").casefold()
         ]
+
+    def add_experience(self, kind: str, text: str) -> dict[str, str]:
+        """Store a timestamped event in Rocky's episodic memory."""
+        kind = kind.strip().casefold()
+        text = text.strip()
+        if not kind or not text:
+            raise ValueError("experience kind and text are required")
+
+        data = self.load()
+        experience = {
+            "kind": kind,
+            "text": text,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        data["experiences"].append(experience)
+        self.save(data)
+        return experience
+
+    def find_experiences(self, kind: str | None = None) -> list[dict[str, str]]:
+        """Return experiences, optionally filtered by kind."""
+        data = self.load()
+        if kind is None or not kind.strip():
+            return list(data["experiences"])
+
+        wanted = kind.strip().casefold()
+        return [
+            item for item in data["experiences"]
+            if item.get("kind", "").casefold() == wanted
+        ]
+
+    def forget_fact(self, subject: str) -> bool:
+        """Remove stored facts and evidence for a subject."""
+        subject = subject.strip()
+        if not subject:
+            raise ValueError("subject is required")
+
+        data = self.load()
+        before = len(data["facts"]) + len(data["evidence"])
+        data["facts"] = [
+            item for item in data["facts"]
+            if item.get("subject", "").casefold() != subject.casefold()
+        ]
+        data["evidence"] = [
+            item for item in data["evidence"]
+            if item.get("subject", "").casefold() != subject.casefold()
+        ]
+        changed = len(data["facts"]) + len(data["evidence"]) != before
+        if changed:
+            self.save(data)
+        return changed
