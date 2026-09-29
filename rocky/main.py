@@ -1,4 +1,4 @@
-"""Command-line entry point for Project Rocky 0.4."""
+"""Command-line entry point for Project Rocky 0.6."""
 
 from .brain.memory_brain import MemoryBrain
 from .config import load_settings
@@ -26,6 +26,20 @@ def parse_learn_command(command: str) -> tuple[str, str, str]:
     return subject_and_source, source_text, source
 
 
+def print_memory(memory: MemoryStore) -> None:
+    facts = memory.load()["facts"]
+    experiences = memory.find_experiences()
+    print(f"Rocky: Memory contains {len(facts)} fact(s) and {len(experiences)} experience(s).")
+    for fact in facts:
+        status = fact.get("verification", "LEGACY")
+        print(f"  FACT [{status}] {fact['subject']}: {fact['text']}")
+    for experience in experiences[-10:]:
+        print(
+            f"  EXPERIENCE [{experience.get('kind', 'unknown')}] "
+            f"{experience.get('timestamp', '')}: {experience.get('text', '')}"
+        )
+
+
 def main() -> None:
     settings = load_settings()
     logger = configure_logging(settings.log_file)
@@ -36,9 +50,9 @@ def main() -> None:
     verifier = Verifier(memory)
     logger.info("Rocky started")
 
-    print("Project Rocky 0.4 — Verification")
-    print("I can learn candidate information, compare supplied sources, and store only verified knowledge as facts.")
-    print("Commands: remember <subject>: <fact> | recall <subject> | learn <subject> [source]: <source text> | verify <subject> | ask <subject> | exit")
+    print("Project Rocky 0.6 — Remembering")
+    print("I can learn, verify, remember facts, and keep a history of learning and verification experiences.")
+    print("Commands: remember <subject>: <fact> | recall <subject> | learn <subject> [source]: <source text> | verify <subject> | ask <subject> | experience <kind>: <text> | memories | forget <subject> | exit")
 
     while True:
         try:
@@ -57,6 +71,7 @@ def main() -> None:
             subject, fact = command.split(":", 1)
             try:
                 response = brain.remember(subject, fact)
+                memory.add_experience("memory", f"Explicitly remembered fact about {subject.strip()}.")
             except ValueError as exc:
                 response = f"I could not remember that: {exc}"
             print(f"Rocky: {response}")
@@ -88,8 +103,28 @@ def main() -> None:
                 print("Rocky: Provide a source with: learn <subject> [source]: <source text>")
             else:
                 print(f"Rocky: {brain.recall(subject)}")
+        elif lower.startswith("experience ") and ":" in user_input:
+            command = user_input[len("experience "):]
+            kind, text = command.split(":", 1)
+            try:
+                experience = memory.add_experience(kind, text)
+                print(f"Rocky: I remembered that experience at {experience['timestamp']}.")
+            except ValueError as exc:
+                print(f"Rocky: I could not remember that experience: {exc}")
+        elif lower == "memories":
+            print_memory(memory)
+        elif lower.startswith("forget "):
+            subject = user_input[len("forget "):].strip()
+            try:
+                if memory.forget_fact(subject):
+                    memory.add_experience("memory", f"Forgot facts and learning evidence about {subject}.")
+                    print(f"Rocky: I forgot facts and learning evidence about {subject}.")
+                else:
+                    print(f"Rocky: I had no facts or learning evidence to forget about {subject}.")
+            except ValueError as exc:
+                print(f"Rocky: I could not forget that: {exc}")
         else:
-            print("Rocky: Use 'remember', 'recall', 'learn', 'verify', or 'ask'.")
+            print("Rocky: Use 'remember', 'recall', 'learn', 'verify', 'ask', 'experience', 'memories', or 'forget'.")
 
 
 if __name__ == "__main__":
