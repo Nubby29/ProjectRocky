@@ -1,1 +1,1 @@
-"""Tool integrations for future Rocky milestones."""
+"""Controlled tools for Rocky 0.8."""
