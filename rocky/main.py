@@ -26,6 +26,19 @@ def parse_learn_command(command: str) -> tuple[str, str, str]:
     return subject_and_source, source_text, source
 
 
+def build_model_context(memory: MemoryStore) -> str:
+    """Build an explicit knowledge-status context for Rocky's language model."""
+    facts = memory.load().get("facts", [])
+    if not facts:
+        return "No stored memory is available."
+
+    lines = []
+    for fact in facts:
+        status = fact.get("verification", "LEGACY").upper()
+        lines.append(f"- [{status}] {fact.get('subject', '')}: {fact.get('text', '')}")
+    return "\n".join(lines)
+
+
 def print_memory(memory: MemoryStore) -> None:
     facts, experiences = memory.load()["facts"], memory.find_experiences()
     print(f"Rocky: Memory contains {len(facts)} fact(s) and {len(experiences)} experience(s).")
@@ -51,8 +64,7 @@ def main() -> None:
         try:
             if lower.startswith("chat "):
                 message=user_input[len("chat "):].strip()
-                facts=memory.load().get("facts", [])
-                context="\n".join(f"{fact.get('subject')}: {fact.get('text')}" for fact in facts)
+                context=build_model_context(memory)
                 response=model_brain.chat(message, context)
                 memory.add_experience("conversation", f"Model {response.model} answered: {response.text}")
                 print(f"Rocky: {response.text}")
