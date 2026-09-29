@@ -2,36 +2,28 @@
 
 A small, growable AI designed to detect what it does not know, learn new information, verify it, remember it, improve over time, and perform controlled actions.
 
-## Current milestone
+## Rocky 1.0 — Growing Brain
 
-Rocky 0.9 — Self-Evaluation
+Rocky now has an optional local language-model brain through an Ollama-compatible API. The model is a generation/reasoning layer; Rocky's persistent memory, verification, self-evaluation, skills, and tools remain separate subsystems.
 
-Rocky can now inspect its own stored knowledge before answering. Self-evaluation uses explicit memory state rather than pretending to measure real-world truth.
+Default model: `llama3.2:3b`
+Default endpoint: `http://127.0.0.1:11434`
 
-### Knowledge states
+Override with environment variables:
 
-- **VERIFIED (1.00)** — an explicitly verified fact is stored;
-- **UNVERIFIED (0.50)** — evidence exists but is not verified;
-- **LEGACY (0.25)** — older fact exists without verification metadata;
-- **UNKNOWN (0.00)** — no stored knowledge or evidence;
-- **CONFLICT (0.00)** — stored sources disagree.
+    $env:ROCKY_MODEL="your-model"
+    $env:ROCKY_MODEL_URL="http://127.0.0.1:11434"
 
-These values are deterministic memory-status signals, not probabilities that a statement is objectively true.
-
-### Run
+Run:
 
     python -m rocky.main
 
-### Examples
+Then use:
 
-    evaluate Python
-    evaluate Java
-    ask Python
+    chat <message>
 
-The `ask` flow now checks self-evaluation and refuses to present conflicting evidence as verified knowledge. Evaluation events are recorded in episodic memory.
+Rocky sends the message plus a compact memory context to the local model. Model responses are recorded as `conversation` experiences, but the model does **not** automatically write new facts into verified memory.
 
-Existing learning, verification, memory, skills, and controlled tools remain available.
+If the local model is unavailable, Rocky reports that clearly instead of pretending it generated an answer.
 
-## Safety boundary
-
-Rocky still does not execute arbitrary Python or shell commands, and it does not claim that a confidence value guarantees real-world truth.
+This phase does not introduce autonomous web research, automatic fact promotion, model training, or arbitrary code execution.
