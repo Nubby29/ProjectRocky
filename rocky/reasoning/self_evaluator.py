@@ -30,13 +30,13 @@ class SelfEvaluator:
         evidence = self.memory.find_evidence(subject)
         sources = {item.get("source", "").casefold() for item in evidence if item.get("source")}
 
-        if any(fact.get("verification") == "VERIFIED" for fact in facts):
-            return EvaluationResult(subject, "VERIFIED", 1.0, "Rocky has explicitly verified knowledge stored for this subject.")
-
         if len(sources) >= 2:
             texts = {" ".join(item.get("text", "").casefold().split()) for item in evidence}
             if len(texts) > 1:
                 return EvaluationResult(subject, "CONFLICT", 0.0, "Stored sources disagree, so Rocky should not treat the subject as verified.")
+
+        if any(fact.get("verification") == "VERIFIED" for fact in facts):
+            return EvaluationResult(subject, "VERIFIED", 1.0, "Rocky has explicitly verified knowledge stored for this subject.")
 
         if evidence:
             return EvaluationResult(subject, "UNVERIFIED", 0.5, f"Rocky has {len(sources)} distinct source(s), but the knowledge is not verified.")
