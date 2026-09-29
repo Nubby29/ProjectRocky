@@ -1,4 +1,4 @@
-"""Command-line entry point for Project Rocky 0.8."""
+"""Command-line entry point for Project Rocky 0.9."""
 
 from .brain.memory_brain import MemoryBrain
 from .config import load_settings
@@ -38,8 +38,8 @@ def main() -> None:
     skills=SkillRegistry(); register_builtin_skills(skills)
     tools=ToolRegistry(); register_builtin_tools(tools)
     logger.info("Rocky started")
-    print("Project Rocky 0.8 — Tools")
-    print("I can learn, verify, remember, perform skills, and use controlled tools.")
+    print("Project Rocky 0.9 — Self-Evaluation")
+    print("I can learn, verify, remember, evaluate my knowledge, perform skills, and use controlled tools.")
     print("Commands: remember <subject>: <fact> | recall <subject> | learn <subject> [source]: <source text> | verify <subject> | evaluate <subject> | ask <subject> | skills | do <skill>: <input> | tools | use <tool>: <input> | experience <kind>: <text> | memories | forget <subject> | exit")
     while True:
         try: user_input=input("You: ").strip()
