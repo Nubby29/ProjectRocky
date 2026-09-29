@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "project-rocky"
-version = "0.2.0"
-description = "A small, growable AI with persistent memory and a learning architecture."
+version = "0.3.0"
+description = "A growable personal AI foundation."
 requires-python = ">=3.10"
 dependencies = []
 
